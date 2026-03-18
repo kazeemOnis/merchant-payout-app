@@ -61,3 +61,18 @@ coverage/
 
 expo-env.d.ts
 # @end expo-cli
+
+# Generated native directories
+ios/
+android/
+screen-security/build/
+screen-security/example/
+
+# AI artifacts
+CLAUDE.md
+AGENTS.md
+initial.md
+.claude/
+
+# Submission zip
+*.zip

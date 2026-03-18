@@ -1,60 +1,59 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import { Text, type TextProps } from 'react-native';
 
+import { Palette } from '@/constants/theme';
+import { typography, type TypographyVariant } from '@/constants/typography';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 export type ThemedTextProps = TextProps & {
+  /**
+   * Typography variant from the design system.
+   * Maps directly to a style in constants/typography.ts.
+   * Defaults to 'body'.
+   */
+  variant?: TypographyVariant;
+  /**
+   * Explicit color override — bypasses theme resolution.
+   * Use for brand highlights, muted text, or fixed-background contexts.
+   */
+  color?: string;
+  /** Theme-aware overrides when you need different colors per scheme. */
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
 };
 
 export function ThemedText({
   style,
+  variant = 'body',
+  color,
   lightColor,
   darkColor,
-  type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const themeColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    'text',
+  );
 
   return (
     <Text
-      style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        style,
-      ]}
+      style={[typography[variant], { color: color ?? themeColor }, style]}
       {...rest}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
-  },
-});
+/**
+ * Convenience preset — brand blue highlight for inline text spans.
+ * Usage: <ThemedText>Normal text <Highlight>blue word</Highlight></ThemedText>
+ */
+export function Highlight({
+  children,
+  style,
+  ...rest
+}: Omit<ThemedTextProps, 'color'>) {
+  return (
+    <ThemedText color={Palette.brandBlue} {...rest} style={style}>
+      {children}
+    </ThemedText>
+  );
+}

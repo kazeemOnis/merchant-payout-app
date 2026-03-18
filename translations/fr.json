@@ -1,0 +1,106 @@
+{
+  "onboarding": {
+    "slide1": {
+      "titlePre": "Conçu pour la performance.",
+      "titleHighlight": "Modulaire",
+      "titlePost": "par nature.",
+      "subtitle": "Infrastructure de paiement de niveau entreprise qui évolue avec votre activité"
+    },
+    "slide2": {
+      "titlePre": "Acceptez des paiements",
+      "titleHighlight": "partout.",
+      "titlePost": "",
+      "subtitle": "Une seule intégration. Toutes les méthodes de paiement. Tous les marchés du monde."
+    },
+    "slide3": {
+      "titlePre": "Versements",
+      "titleHighlight": "à grande échelle.",
+      "titlePost": "",
+      "subtitle": "Versements rapides et fiables aux marchands dans plus de 70 pays."
+    }
+  },
+  "common": {
+    "next": "Suivant",
+    "getStarted": "Commencer",
+    "continue": "Continuer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "retry": "Réessayer",
+    "close": "Fermer"
+  },
+  "home": {
+    "title": "Compte professionnel",
+    "available": "Disponible",
+    "pending": "En attente",
+    "availableBalance": "Solde disponible",
+    "pendingBalance": "Solde en attente",
+    "recentActivity": "Activité récente",
+    "viewAll": "Voir tout →",
+    "showMore": "Voir plus",
+    "loadingBalance": "Chargement du solde...",
+    "errorBalance": "Échec du chargement des données. Veuillez réessayer."
+  },
+  "activity": {
+    "title": "Historique des transactions",
+    "empty": "Aucune transaction pour l'instant",
+    "loadingMore": "Chargement...",
+    "errorLoad": "Échec du chargement des transactions. Veuillez réessayer."
+  },
+  "payouts": {
+    "title": "Envoyer un virement",
+    "availableBalance": "Solde disponible",
+    "enterAmount": "Saisir le montant",
+    "destinationIban": "IBAN de destination",
+    "ibanPlaceholder": "FR00 0000 0000 0000 0000 000",
+    "ibanHelper": "Saisissez l'IBAN du compte bancaire de destination",
+    "continue": "Continuer",
+    "confirmTitle": "Confirmer le virement",
+    "confirmDescription": "Veuillez vérifier les détails avant d'envoyer.",
+    "amount": "Montant",
+    "currency": "Devise",
+    "to": "À",
+    "send": "Envoyer le virement",
+    "successTitle": "Virement envoyé",
+    "successDescription": "{amount} est en route vers le compte de destination.",
+    "failTitle": "Virement échoué",
+    "tryAgain": "Réessayer",
+    "done": "Terminé",
+    "errorInsufficient": "Fonds insuffisants pour ce virement.",
+    "errorUnavailable": "Service temporairement indisponible. Veuillez réessayer.",
+    "errorNetwork": "Erreur réseau. Vérifiez votre connexion et réessayez.",
+    "errorGeneric": "Une erreur s'est produite. Veuillez réessayer.",
+    "biometricPrompt": "Authentifiez-vous pour confirmer le virement",
+    "biometricRequired": "Authentification biométrique requise pour les virements supérieurs à {threshold}.",
+    "biometricNotEnrolled": "Configurez la biométrie dans les paramètres pour les grands virements.",
+    "screenshotWarning": "Capture d'écran détectée — gardez vos informations financières privées.",
+    "selectCurrency": "Sélectionner la devise",
+    "currencyPickerLabel": "Devise : {value}, appuyer pour modifier",
+    "back": "← Retour"
+  },
+  "signIn": {
+    "title": "Se connecter",
+    "subtitle": "Accédez à votre tableau de bord Checkout.com",
+    "emailLabel": "Adresse e-mail",
+    "emailPlaceholder": "vous@exemple.com",
+    "cta": "Se connecter",
+    "signingIn": "Connexion..."
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "invalidEmail": "Saisissez une adresse e-mail valide",
+    "invalidIban": "Saisissez un IBAN valide",
+    "amountZero": "Le montant doit être supérieur à zéro",
+    "amountNegative": "Le montant ne peut pas être négatif"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "theme": "Apparence",
+    "dark": "Sombre",
+    "light": "Clair",
+    "languages": {
+      "en": "English",
+      "fr": "Français"
+    }
+  }
+}

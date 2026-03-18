@@ -1,32 +1,77 @@
-import { StyleSheet } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { addScreenshotListener } from 'screen-security';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { PayoutConfirmStep } from '@/components/payouts/payout-confirm-step';
+import { PayoutFormStep } from '@/components/payouts/payout-form-step';
+import { PayoutResultStep } from '@/components/payouts/payout-result-step';
+import { ScreenshotToast } from '@/components/ui/screenshot-toast';
+import { useMerchant } from '@/hooks/use-merchant';
+import { usePayout } from '@/hooks/use-payout';
 
 export default function PayoutsScreen() {
+  const { data: merchantData, loading: merchantLoading } = useMerchant();
+  const {
+    step,
+    setStep,
+    resultStatus,
+    resultError,
+    submitting,
+    control,
+    errors,
+    values,
+    setValue,
+    canContinue,
+    onContinue,
+    onSend,
+    onDone,
+  } = usePayout();
+
+  const [toastVisible, setToastVisible] = useState(false);
+
+  useEffect(() => {
+    return addScreenshotListener(() => setToastVisible(true));
+  }, []);
+
+  const dismissToast = useCallback(() => setToastVisible(false), []);
+
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <ThemedText type="title">Initiate Payout</ThemedText>
-      </ThemedView>
+    <View style={styles.root}>
+      {step === 'form' && (
+        <PayoutFormStep
+          control={control}
+          errors={errors}
+          setValue={setValue}
+          canContinue={canContinue}
+          merchantData={merchantData}
+          merchantLoading={merchantLoading}
+          onContinue={onContinue}
+        />
+      )}
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Payout Amount</ThemedText>
-      </ThemedView>
+      {step === 'confirm' && (
+        <PayoutConfirmStep
+          values={values}
+          submitting={submitting}
+          onBack={() => setStep('form')}
+          onSend={onSend}
+        />
+      )}
 
-    </ThemedView>
+      {step === 'result' && (
+        <PayoutResultStep
+          resultStatus={resultStatus}
+          resultError={resultError}
+          values={values}
+          onDone={onDone}
+        />
+      )}
+
+      <ScreenshotToast visible={toastVisible} onDismiss={dismissToast} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  header: {
-    marginBottom: 24,
-  },
-  section: {
-    marginBottom: 24,
-  },
+  root: { flex: 1 },
 });

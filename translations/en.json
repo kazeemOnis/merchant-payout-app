@@ -1,0 +1,106 @@
+{
+  "onboarding": {
+    "slide1": {
+      "titlePre": "Built for performance.",
+      "titleHighlight": "Modular",
+      "titlePost": "by design.",
+      "subtitle": "Enterprise-grade payment infrastructure that scales with your business"
+    },
+    "slide2": {
+      "titlePre": "Accept payments",
+      "titleHighlight": "everywhere.",
+      "titlePost": "",
+      "subtitle": "One integration. Every payment method. Any market, anywhere in the world."
+    },
+    "slide3": {
+      "titlePre": "Pay out",
+      "titleHighlight": "at scale.",
+      "titlePost": "",
+      "subtitle": "Fast, reliable payouts to merchants and sellers in 70+ countries."
+    }
+  },
+  "common": {
+    "next": "Next",
+    "getStarted": "Get Started",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "retry": "Try again",
+    "close": "Close"
+  },
+  "home": {
+    "title": "Business Account",
+    "available": "Available",
+    "pending": "Pending",
+    "availableBalance": "Available balance",
+    "pendingBalance": "Pending balance",
+    "recentActivity": "Recent activity",
+    "viewAll": "View all →",
+    "showMore": "Show more",
+    "loadingBalance": "Loading balance...",
+    "errorBalance": "Failed to load account data. Please try again."
+  },
+  "activity": {
+    "title": "Transaction history",
+    "empty": "No transactions yet",
+    "loadingMore": "Loading more...",
+    "errorLoad": "Failed to load transactions. Please try again."
+  },
+  "payouts": {
+    "title": "Send Payout",
+    "availableBalance": "Available Balance",
+    "enterAmount": "Enter Amount",
+    "destinationIban": "Destination IBAN",
+    "ibanPlaceholder": "GB00 0000 0000 0000 0000 00",
+    "ibanHelper": "Enter the destination bank account IBAN",
+    "continue": "Continue",
+    "confirmTitle": "Confirm Payout",
+    "confirmDescription": "Please review the details before sending.",
+    "amount": "Amount",
+    "currency": "Currency",
+    "to": "To",
+    "send": "Send Payout",
+    "successTitle": "Payout Sent",
+    "successDescription": "{amount} is on its way to the destination account.",
+    "failTitle": "Payout Failed",
+    "tryAgain": "Try Again",
+    "done": "Done",
+    "errorInsufficient": "Insufficient funds for this payout.",
+    "errorUnavailable": "Service temporarily unavailable. Please try again.",
+    "errorNetwork": "Network error. Check your connection and try again.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "biometricPrompt": "Authenticate to confirm payout",
+    "biometricRequired": "Biometric authentication required for payouts over {threshold}.",
+    "biometricNotEnrolled": "Please set up biometrics in your device settings to send large payouts.",
+    "screenshotWarning": "Screenshot detected — keep your financial details private.",
+    "selectCurrency": "Select currency",
+    "currencyPickerLabel": "Currency: {value}, tap to change",
+    "back": "← Back"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "subtitle": "Access your Checkout.com dashboard",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "cta": "Sign in",
+    "signingIn": "Signing in..."
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Enter a valid email address",
+    "invalidIban": "Enter a valid IBAN",
+    "amountZero": "Amount must be greater than zero",
+    "amountNegative": "Amount cannot be negative"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Appearance",
+    "dark": "Dark",
+    "light": "Light",
+    "languages": {
+      "en": "English",
+      "fr": "French"
+    }
+  }
+}
