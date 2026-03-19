@@ -62,9 +62,9 @@ coverage/
 expo-env.d.ts
 # @end expo-cli
 
-# Generated native directories
-ios/
-android/
+# Generated native directories (root only — screen-security/ios and android are source)
+/ios/
+/android/
 screen-security/build/
 screen-security/example/
 
