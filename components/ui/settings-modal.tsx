@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
@@ -10,6 +11,7 @@ import {
 } from '@/contexts/settings-context';
 import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAuthStore } from '@/store/auth-store';
 
 const THEMES: { value: Theme; labelKey: string }[] = [
   { value: 'dark', labelKey: 'settings.dark' },
@@ -31,6 +33,14 @@ export function SettingsModal({ visible, onClose }: Props) {
   const { theme, setTheme, locale, setLocale } = useSettings();
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
+  const { clearAuth } = useAuthStore();
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    onClose();
+    clearAuth();
+    router.replace('/sign-in');
+  };
 
   return (
     <Modal
@@ -119,6 +129,16 @@ export function SettingsModal({ visible, onClose }: Props) {
               </Pressable>
             ))}
           </View>
+
+          <Pressable
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+            testID='sign-out-button'
+          >
+            <ThemedText variant='body' color={Palette.accentRed}>
+              {t('settings.signOut')}
+            </ThemedText>
+          </Pressable>
         </Pressable>
       </Pressable>
     </Modal>
@@ -156,6 +176,14 @@ function makeStyles(p: ThemePalette) {
       marginBottom: 24,
     },
     sectionLabel: { marginBottom: 4, marginTop: 16 },
+    signOutButton: {
+      marginTop: 24,
+      paddingVertical: 16,
+      alignItems: 'center',
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: Palette.accentRed,
+    },
     optionGroup: {
       borderRadius: 12,
       overflow: 'hidden',

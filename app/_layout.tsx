@@ -16,6 +16,7 @@ import 'react-native-reanimated';
 
 import { SettingsModal } from '@/components/ui/settings-modal';
 import { SettingsProvider, useSettings } from '@/contexts/settings-context';
+import { useBootstrap } from '@/hooks/use-bootstrap';
 import { useThemePalette } from '@/hooks/use-theme-palette';
 
 import { useMSW } from '../mocks/useMSW';
@@ -81,7 +82,8 @@ export default function RootLayout() {
     'IBMPlexMono-Bold': require('@/assets/fonts/IBMPlexMono-Bold.ttf'),
   });
 
-  const isReady = fontsLoaded && isMSWReady;
+  const isAuthChecked = useBootstrap(fontsLoaded, isMSWReady);
+  const isReady = fontsLoaded && isMSWReady && isAuthChecked;
 
   useEffect(() => {
     if (isReady) {

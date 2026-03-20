@@ -107,12 +107,15 @@ export type InputProps = TextInputProps & {
   inputType?: InputType;
   label?: string;
   error?: string;
+  /** Rendered inside the input box, pinned to the right edge. Use for icons or toggle buttons. */
+  rightAccessory?: React.ReactNode;
 };
 
 export function Input({
   inputType = 'text',
   label,
   error,
+  rightAccessory,
   style,
   onFocus,
   onBlur,
@@ -128,26 +131,32 @@ export function Input({
     <View style={styles.wrapper}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
-      <TextInput
-        // Preset defaults first — explicit props in `rest` override them
-        {...preset}
-        style={[
-          styles.input,
-          isFocused && styles.inputFocused,
-          !!error && styles.inputError,
-          style,
-        ]}
-        placeholderTextColor={palette.textMuted}
-        onFocus={e => {
-          setIsFocused(true);
-          onFocus?.(e);
-        }}
-        onBlur={e => {
-          setIsFocused(false);
-          onBlur?.(e);
-        }}
-        {...rest}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          // Preset defaults first — explicit props in `rest` override them
+          {...preset}
+          style={[
+            styles.input,
+            isFocused && styles.inputFocused,
+            !!error && styles.inputError,
+            rightAccessory ? styles.inputWithAccessory : undefined,
+            style,
+          ]}
+          placeholderTextColor={palette.textMuted}
+          onFocus={e => {
+            setIsFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={e => {
+            setIsFocused(false);
+            onBlur?.(e);
+          }}
+          {...rest}
+        />
+        {rightAccessory ? (
+          <View style={styles.rightAccessory}>{rightAccessory}</View>
+        ) : null}
+      </View>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
@@ -159,6 +168,19 @@ function makeStyles(p: ThemePalette) {
     wrapper: {
       width: '100%',
       gap: 6,
+    },
+    inputContainer: {
+      position: 'relative',
+    },
+    inputWithAccessory: {
+      paddingRight: 48,
+    },
+    rightAccessory: {
+      position: 'absolute',
+      right: 14,
+      top: 0,
+      bottom: 0,
+      justifyContent: 'center',
     },
     label: {
       fontFamily: fontFamily.regular,

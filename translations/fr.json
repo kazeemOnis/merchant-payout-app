@@ -81,13 +81,25 @@
     "title": "Se connecter",
     "subtitle": "Accédez à votre tableau de bord Checkout.com",
     "emailLabel": "Adresse e-mail",
-    "emailPlaceholder": "vous@exemple.com",
+    "emailPlaceholder": "vous@checkout.com",
+    "passwordLabel": "Mot de passe",
     "cta": "Se connecter",
-    "signingIn": "Connexion..."
+    "signingIn": "Connexion...",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotPasswordSending": "Envoi en cours...",
+    "forgotPasswordSent": "Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé.",
+    "forgotPasswordEnterEmail": "Saisissez d'abord votre adresse @checkout.com.",
+    "forgotPasswordConfirmTitle": "Réinitialiser votre mot de passe ?",
+    "forgotPasswordConfirmBody": "Nous enverrons un lien de réinitialisation à {email}.",
+    "forgotPasswordConfirmSend": "Envoyer le lien",
+    "orSignInWith": "ou se connecter avec",
+    "faceId": "Se connecter avec Face ID",
+    "biometricNotEnrolled": "Configurez Face ID dans les réglages pour utiliser cette fonctionnalité."
   },
   "errors": {
     "required": "Ce champ est requis",
     "invalidEmail": "Saisissez une adresse e-mail valide",
+    "checkoutEmailOnly": "Utilisez votre adresse e-mail @checkout.com",
     "invalidIban": "Saisissez un IBAN valide",
     "amountZero": "Le montant doit être supérieur à zéro",
     "amountNegative": "Le montant ne peut pas être négatif"
@@ -101,6 +113,7 @@
     "languages": {
       "en": "English",
       "fr": "Français"
-    }
+    },
+    "signOut": "Se déconnecter"
   }
 }

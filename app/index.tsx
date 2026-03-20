@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -11,15 +11,21 @@ import { Button } from '@/components/ui/button';
 import { SLIDES } from '@/constants/onboarding';
 import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAuthStore } from '@/store/auth-store';
 
 const SWIPE_THRESHOLD = 50;
 
 export default function OnboardingScreen() {
+  const { isAuthenticated } = useAuthStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
   const { t } = useTranslation();
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
+
+  if (isAuthenticated) {
+    return <Redirect href='/(tabs)' />;
+  }
 
   const isLastSlide = currentIndex === SLIDES.length - 1;
 

@@ -1,24 +1,52 @@
+import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { isBiometricAuthenticated } from 'screen-security';
 import { z } from 'zod';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Toast } from '@/components/ui/toast';
+import { Palette } from '@/constants/theme';
 import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
+import { MOCK_MERCHANT, MOCK_TOKEN, useAuthStore } from '@/store/auth-store';
 
-type SignInForm = { email: string };
+type SignInForm = { email: string; password: string };
 
 export default function SignInScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
+  const { setAuth } = useAuthStore();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    message: string;
+    variant: 'success' | 'error' | 'info';
+  }>({ visible: false, message: '', variant: 'info' });
+
+  const showToast = (
+    message: string,
+    variant: 'success' | 'error' | 'info' = 'info',
+  ) => {
+    setToast({ visible: true, message, variant });
+  };
 
   const schema = useMemo(
     () =>
@@ -26,7 +54,12 @@ export default function SignInScreen() {
         email: z
           .string()
           .min(1, t('errors.required'))
-          .email(t('errors.invalidEmail')),
+          .email(t('errors.invalidEmail'))
+          .refine(
+            v => v.endsWith('@checkout.com'),
+            t('errors.checkoutEmailOnly'),
+          ),
+        password: z.string().min(1, t('errors.required')),
       }),
     [t],
   );
@@ -34,20 +67,72 @@ export default function SignInScreen() {
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<SignInForm>({
     resolver: zodResolver(schema),
-    defaultValues: { email: '' },
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = async (_data: SignInForm) => {
-    // Mock auth — any valid email succeeds
     await new Promise(resolve => setTimeout(resolve, 800));
+    setAuth(MOCK_TOKEN, MOCK_MERCHANT);
     router.replace('/(tabs)');
+  };
+
+  const onFaceId = async () => {
+    try {
+      const ok = await isBiometricAuthenticated();
+      if (ok) {
+        setAuth(MOCK_TOKEN, MOCK_MERCHANT);
+        router.replace('/(tabs)');
+      }
+    } catch (e) {
+      const code = (e as { code?: string })?.code ?? '';
+      if (
+        code === 'BIOMETRICS_NOT_ENROLLED' ||
+        String(e).includes('NOT_ENROLLED')
+      ) {
+        showToast(t('signIn.biometricNotEnrolled'), 'error');
+      }
+      // User cancelled — do nothing
+    }
+  };
+
+  const onForgotPassword = () => {
+    const email = getValues('email');
+    if (!email || !email.endsWith('@checkout.com')) {
+      showToast(t('signIn.forgotPasswordEnterEmail'), 'error');
+      return;
+    }
+    Alert.alert(
+      t('signIn.forgotPasswordConfirmTitle'),
+      t('signIn.forgotPasswordConfirmBody', { email }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('signIn.forgotPasswordConfirmSend'),
+          style: 'default',
+          onPress: async () => {
+            setForgotLoading(true);
+            await new Promise(resolve => setTimeout(resolve, 900));
+            setForgotLoading(false);
+            showToast(t('signIn.forgotPasswordSent'), 'success');
+          },
+        },
+      ],
+    );
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <Toast
+        message={toast.message}
+        variant={toast.variant}
+        visible={toast.visible}
+        onDismiss={() => setToast(prev => ({ ...prev, visible: false }))}
+      />
+
       <KeyboardAvoidingView
         style={styles.inner}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -63,6 +148,7 @@ export default function SignInScreen() {
         </View>
 
         <View style={styles.form}>
+          {/* Email */}
           <Controller
             control={control}
             name='email'
@@ -71,8 +157,7 @@ export default function SignInScreen() {
                 inputType='email'
                 label={t('signIn.emailLabel')}
                 placeholder={t('signIn.emailPlaceholder')}
-                returnKeyType='go'
-                onSubmitEditing={handleSubmit(onSubmit)}
+                returnKeyType='next'
                 error={errors.email?.message}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -80,15 +165,87 @@ export default function SignInScreen() {
               />
             )}
           />
+
+          {/* Password with show/hide toggle */}
+          <Controller
+            control={control}
+            name='password'
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                inputType='password'
+                secureTextEntry={!showPassword}
+                label={t('signIn.passwordLabel')}
+                placeholder='••••••••'
+                returnKeyType='go'
+                onSubmitEditing={handleSubmit(onSubmit)}
+                error={errors.password?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                rightAccessory={
+                  <Pressable
+                    onPress={() => setShowPassword(p => !p)}
+                    hitSlop={8}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                      size={20}
+                      color={palette.textMuted}
+                    />
+                  </Pressable>
+                }
+              />
+            )}
+          />
+
+          {/* Forgot password */}
+          <Pressable
+            onPress={onForgotPassword}
+            disabled={forgotLoading}
+            style={styles.forgotRow}
+            hitSlop={8}
+          >
+            <ThemedText
+              variant='bodySmall'
+              color={forgotLoading ? palette.textMuted : Palette.ctaBlue}
+            >
+              {forgotLoading
+                ? t('signIn.forgotPasswordSending')
+                : t('signIn.forgotPassword')}
+            </ThemedText>
+          </Pressable>
         </View>
 
-        <Button
-          label={t('signIn.cta')}
-          onPress={handleSubmit(onSubmit)}
-          fullWidth
-          size='lg'
-          loading={isSubmitting}
-        />
+        <View style={styles.actions}>
+          <Button
+            label={t('signIn.cta')}
+            onPress={handleSubmit(onSubmit)}
+            fullWidth
+            size='lg'
+            loading={isSubmitting}
+          />
+
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <ThemedText variant='caption' color={palette.textMuted}>
+              {t('signIn.orSignInWith')}
+            </ThemedText>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable
+            onPress={onFaceId}
+            style={[
+              styles.faceIdButton,
+              { borderColor: palette.surfaceElevated },
+            ]}
+          >
+            <Ionicons name='scan-outline' size={20} color={palette.white} />
+            <ThemedText variant='body' color={palette.white}>
+              {t('signIn.faceId')}
+            </ThemedText>
+          </Pressable>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -116,6 +273,32 @@ function makeStyles(p: ThemePalette) {
     form: {
       gap: 20,
       marginBottom: 'auto',
+    },
+    forgotRow: {
+      alignSelf: 'flex-end',
+      marginTop: -8,
+    },
+    actions: {
+      gap: 16,
+    },
+    dividerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    dividerLine: {
+      flex: 1,
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: p.surfaceElevated,
+    },
+    faceIdButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      paddingVertical: 16,
+      borderRadius: 6,
+      borderWidth: 1,
     },
   });
 }

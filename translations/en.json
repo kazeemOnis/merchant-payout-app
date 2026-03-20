@@ -81,13 +81,25 @@
     "title": "Sign in",
     "subtitle": "Access your Checkout.com dashboard",
     "emailLabel": "Email address",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "you@checkout.com",
+    "passwordLabel": "Password",
     "cta": "Sign in",
-    "signingIn": "Signing in..."
+    "signingIn": "Signing in...",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordSending": "Sending...",
+    "forgotPasswordSent": "If an account exists for this email, a reset link has been sent.",
+    "forgotPasswordEnterEmail": "Enter your @checkout.com email address first.",
+    "forgotPasswordConfirmTitle": "Reset your password?",
+    "forgotPasswordConfirmBody": "We'll send a reset link to {email}.",
+    "forgotPasswordConfirmSend": "Send reset link",
+    "orSignInWith": "or sign in with",
+    "faceId": "Sign in with Face ID",
+    "biometricNotEnrolled": "Set up Face ID in your device settings to use this feature."
   },
   "errors": {
     "required": "This field is required",
     "invalidEmail": "Enter a valid email address",
+    "checkoutEmailOnly": "Use your @checkout.com email address",
     "invalidIban": "Enter a valid IBAN",
     "amountZero": "Amount must be greater than zero",
     "amountNegative": "Amount cannot be negative"
@@ -101,6 +113,7 @@
     "languages": {
       "en": "English",
       "fr": "French"
-    }
+    },
+    "signOut": "Sign Out"
   }
 }

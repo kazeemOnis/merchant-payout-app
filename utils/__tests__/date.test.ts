@@ -6,7 +6,7 @@ describe('formatDate', () => {
   });
 
   it('zero-pads single-digit days', () => {
-    expect(formatDate('2026-01-05T00:00:00.000Z')).toBe('05 Jan 2026');
+    expect(formatDate('2026-01-05T12:00:00.000Z')).toBe('05 Jan 2026');
   });
 
   it('formats the last day of the year', () => {
