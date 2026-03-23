@@ -79,7 +79,7 @@ public class ScreenSecurityModule: Module {
       do {
         let result = try await context.evaluatePolicy(
           .deviceOwnerAuthenticationWithBiometrics,
-          localizedReason: "Verify your identity to authorise this payout"
+          localizedReason: "Verify your identity to access Checkout"
         )
         print("[ScreenSecurity] Biometric result: \(result)")
         return result

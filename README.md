@@ -32,10 +32,119 @@ Your task is to build a merchant dashboard and payout flow that allows users to:
 
 The project comes with the following pre-configured technologies:
 
-* **Expo (SDK 52+)** - Framework for React Native
-* **TypeScript** - For type safety
-* **Expo Router** - File-based routing
-* **Jest & React Native Testing Library** - For testing
+| Layer | Choice |
+|---|---|
+| Framework | Expo SDK 54, React Native 0.81 (New Architecture) |
+| Routing | Expo Router (file-based) |
+| Forms | react-hook-form + zod |
+| State | Zustand (client state) + TanStack Query (server state) |
+| Animations | react-native-reanimated 4.x |
+| Persistence | expo-secure-store (tokens) + react-native-mmkv (preferences) |
+| Mocked API | MSW v2 |
+| Testing | Jest + @testing-library/react-native |
+| E2E | Maestro |
+
+---
+
+## 🏗️ Implementation Architecture
+
+### Auth & Session
+
+Auth is managed by a Zustand store (`store/auth-store.ts`) backed by `expo-secure-store`. On launch, `useBootstrap` reads the stored token — if `biometricEnabled` is set, it gates session restore behind Face ID before restoring state. First-time users go straight to the sign-in form. Logout calls `clearAuth()` which deletes the token from SecureStore and resets Zustand state atomically before navigating to sign-in.
+
+Storage split: **SecureStore** for the auth token (encrypted, OS-managed), **MMKV** for all UI preferences (theme, locale, currency, biometric settings, notification preferences).
+
+See [`docs/auth.md`](docs/auth.md) for the full flow.
+
+### Service Layer
+
+All data fetching goes through `services/` — screens and hooks never call `fetch()` directly.
+
+```
+services/
+  api/
+    client.ts         ← base fetch + request/response interceptors
+    merchant.ts       ← getMerchant()
+    transactions.ts   ← getActivity()
+    payouts.ts        ← createPayout()
+  analytics/
+    index.ts          ← AnalyticsProvider interface + consoleProvider + analytics facade
+    events.ts         ← typed Events catalogue
+```
+
+The request interceptor attaches the auth token and an `Idempotency-Key` on POST requests. The response interceptor normalises all errors into a typed `ApiError` with codes `INSUFFICIENT_FUNDS`, `SERVICE_UNAVAILABLE`, `NETWORK_ERROR`, `UNAUTHORISED`, `UNKNOWN` — callers read `.code`, never HTTP status.
+
+### Analytics
+
+All tracking goes through `analytics.track(Events.X)` — never a third-party SDK directly. The console provider logs in dev; swapping to PostHog/Amplitude is a one-line change in `services/analytics/index.ts`. All calls are silenced if ATT permission is `'denied'` (MMKV key `att_status`). Raw monetary amounts are never logged — `payout_confirmed` uses `above_threshold: boolean`.
+
+See [`docs/analytics.md`](docs/analytics.md) for the event catalogue.
+
+### Notifications
+
+`expo-notifications` with `shouldShowAlert: false` for foreground suppression. Permission is requested once during onboarding. On payout success/failure, a local notification is scheduled if the user has granted permission and has the relevant toggle enabled in Account → Notifications.
+
+See [`docs/notifications.md`](docs/notifications.md) for the full setup.
+
+### Native Module: ScreenSecurity
+
+A single local Expo module (`screen-security/`) built with Expo Modules API — no third-party native libs:
+
+| Function | iOS | Android |
+|---|---|---|
+| `getDeviceId()` | `UIDevice.identifierForVendor` | `Settings.Secure.ANDROID_ID` |
+| `isBiometricAuthenticated()` | `LAContext.evaluatePolicy` | `BiometricPrompt` (AndroidX) |
+| `onScreenshotTaken` event | `UIApplication.userDidTakeScreenshotNotification` | `Activity.ScreenCaptureCallback` (API 34+) |
+
+See [`docs/native-modules.md`](docs/native-modules.md) for setup commands and simulator testing.
+
+---
+
+## 🧪 Running Tests
+
+```bash
+npm test                           # all tests
+npm run test:watch                 # watch mode
+npx jest path/to/file.test.ts      # single file
+```
+
+All component tests are in `components/__tests__/`. Hook tests in `hooks/__tests__/`. Service tests in `services/__tests__/`.
+
+---
+
+## 🤖 E2E Tests (Maestro)
+
+### Install Maestro CLI
+
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash
+```
+
+### Prerequisites
+
+Maestro tests require a native build (not Expo Go):
+
+```bash
+npx expo run:ios
+```
+
+### Run flows
+
+```bash
+# Happy path — onboarding → sign-in → payout below £1,000 → success
+maestro test e2e/payout-happy-path.yaml
+
+# Biometric gate — payout above £1,000 → Face ID → success
+maestro test e2e/payout-biometric.yaml
+
+# Error states — insufficient funds + service unavailable
+maestro test e2e/payout-errors.yaml
+
+# All flows
+maestro test e2e/
+```
+
+See [`e2e/README.md`](e2e/README.md) for Face ID simulator setup and screenshot detection testing.
 
 ## 📡 API Documentation
 

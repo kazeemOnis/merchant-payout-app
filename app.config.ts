@@ -15,7 +15,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: 'com.checkout.app',
     associatedDomains: ['applinks:dashboard.checkout.com'],
     infoPlist: {
-      NSFaceIDUsageDescription: 'Verify your identity to authorise payouts over £1,000.',
+      NSFaceIDUsageDescription: 'Use Face ID to sign in and confirm transactions.',
     },
   },
   android: {
@@ -34,6 +34,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     'expo-router',
     'expo-secure-store',
+    [
+      'expo-notifications',
+      {
+        icon: './assets/images/adaptive-icon.png',
+        color: '#186AFE',
+      },
+    ],
+    'expo-tracking-transparency',
     [
       'expo-splash-screen',
       {

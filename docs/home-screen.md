@@ -92,7 +92,7 @@ The `SettingsModal` is mounted in `app/_layout.tsx` — above the navigator — 
 
 ### Theme selector
 
-Renders two tappable tiles (`dark` / `light`). The active tile gets a `Palette.brandBlue` border. Selecting a tile calls `setTheme(value)` from `useSettings()`, which writes to MMKV and updates the React state. The `ThemeProvider` in `AppShell` receives the new value and React Navigation propagates the theme change immediately across all screens.
+Renders two tappable tiles (`dark` / `light`). The active tile gets a `Palette.brandBlue` border. Selecting a tile calls `setTheme(value)` from `useSettingsStore()`, which persists via MMKV. The `ThemeProvider` in `AppShell` receives the new value and React Navigation propagates the theme change immediately across all screens.
 
 ### Language selector
 

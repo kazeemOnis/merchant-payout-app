@@ -1,17 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
 import { useCallback, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Alert } from 'react-native';
 import { getDeviceId, isBiometricAuthenticated } from 'screen-security';
 import { z } from 'zod';
 
-import { API_BASE_URL } from '@/constants';
+import { MERCHANT_QUERY_KEY } from '@/hooks/use-merchant';
 import { useTranslation } from '@/hooks/use-translation';
-import { amountToPence } from '@/utils/currency';
+import { analytics, Events } from '@/services/analytics';
+import { ApiError, createPayout } from '@/services/api';
+import { useAccountStore } from '@/store/account-store';
+import { amountToPence, formatAmount } from '@/utils/currency';
 import { isValidIban, normaliseIban } from '@/utils/iban';
-
-// 1,000.00 in lowest denomination (pence / cents) — applies to both GBP and EUR
-const BIOMETRIC_THRESHOLD_PENCE = 100_000;
+import { mmkvStorage } from '@/utils/storage';
 
 export type PayoutForm = {
   amount: string;
@@ -22,6 +25,13 @@ export type PayoutStep = 'form' | 'confirm' | 'result';
 
 export function usePayout() {
   const { t } = useTranslation();
+  const {
+    biometricEnabled,
+    biometricThresholdGBP,
+    notifPayoutSuccess,
+    notifPayoutFailure,
+  } = useAccountStore();
+  const queryClient = useQueryClient();
 
   const schema = useMemo(
     () =>
@@ -47,7 +57,6 @@ export function usePayout() {
     'success',
   );
   const [resultError, setResultError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
 
   const {
     control,
@@ -64,39 +73,50 @@ export function usePayout() {
 
   const values = watch();
 
-  const canContinue = (() => {
-    const n = parseFloat(values.amount);
-    return !isNaN(n) && n > 0 && values.iban.trim().length > 0;
-  })();
+  /** Must match Zod + handleSubmit — the old check only tested length, so Continue
+   * could look enabled while IBAN failed isValidIban() and onContinue did nothing. */
+  const canContinue = useMemo(
+    () => schema.safeParse(values).success,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [schema, values.amount, values.currency, values.iban],
+  );
 
   const onContinue = handleSubmit(() => setStep('confirm'));
+
+  const { mutateAsync: submitPayout, isPending: submitting } = useMutation({
+    mutationFn: createPayout,
+    retry: false,
+    onSuccess: () => {
+      // Invalidate merchant balance so home screen refreshes in the background
+      queryClient.invalidateQueries({ queryKey: MERCHANT_QUERY_KEY });
+    },
+  });
 
   const onSend = useCallback(async () => {
     const { amount, currency, iban } = getValues();
     const pence = amountToPence(amount);
-    setSubmitting(true);
+    const thresholdPence = biometricThresholdGBP * 100;
 
-    // Biometric gate — required for payouts exceeding the threshold
-    if (pence > BIOMETRIC_THRESHOLD_PENCE) {
+    // Biometric gate
+    if (biometricEnabled && pence > thresholdPence) {
       try {
         const authenticated = await isBiometricAuthenticated();
-        if (!authenticated) {
-          // User cancelled — keep them on the confirm screen
-          setSubmitting(false);
-          return;
-        }
+        if (!authenticated) return; // user cancelled — stay on confirm screen
       } catch (e) {
         const code = (e as { code?: string })?.code ?? '';
         const isNotEnrolled =
           code === 'BIOMETRICS_NOT_ENROLLED' ||
           String(e).includes('NOT_ENROLLED');
+        const isUnavailable =
+          code === 'BIOMETRIC_UNAVAILABLE' || String(e).includes('UNAVAILABLE');
         Alert.alert(
           t('payouts.biometricPrompt'),
           isNotEnrolled
             ? t('payouts.biometricNotEnrolled')
+            : isUnavailable
+            ? t('payouts.biometricUnavailable')
             : t('payouts.errorGeneric'),
         );
-        setSubmitting(false);
         return;
       }
     }
@@ -104,38 +124,73 @@ export function usePayout() {
     try {
       const deviceId = await getDeviceId();
 
-      const res = await fetch(`${API_BASE_URL}/api/payouts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: pence,
-          currency,
-          iban: normaliseIban(iban),
-          ...(deviceId ? { device_id: deviceId } : {}),
-        }),
+      await submitPayout({
+        amount: pence,
+        currency,
+        iban: normaliseIban(iban),
+        ...(deviceId ? { device_id: deviceId } : {}),
       });
 
-      if (!res.ok) {
-        const errorKey =
-          res.status === 400
-            ? 'payouts.errorInsufficient'
-            : res.status === 503
-            ? 'payouts.errorUnavailable'
-            : 'payouts.errorGeneric';
-        setResultError(t(errorKey));
-        setResultStatus('error');
-      } else {
-        setResultStatus('success');
-        setResultError(null);
+      analytics.track(Events.PAYOUT_CONFIRMED, {
+        currency,
+        above_threshold: pence > thresholdPence,
+      });
+
+      setResultStatus('success');
+      setResultError(null);
+
+      const notifPermission = mmkvStorage.getItem('notification_permission');
+      if (notifPayoutSuccess && notifPermission === 'granted') {
+        const successDescription = formatAmount(pence, currency);
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: t('account.notifications.payoutSuccess'),
+            body: successDescription,
+            data: { screen: '/(tabs)' },
+          },
+          trigger: null,
+        });
       }
-    } catch {
-      setResultError(t('payouts.errorNetwork'));
+    } catch (e) {
+      const code = e instanceof ApiError ? e.code : 'UNKNOWN';
+      const errorKey =
+        code === 'INSUFFICIENT_FUNDS'
+          ? 'payouts.errorInsufficient'
+          : code === 'SERVICE_UNAVAILABLE'
+          ? 'payouts.errorUnavailable'
+          : code === 'NETWORK_ERROR'
+          ? 'payouts.errorNetwork'
+          : 'payouts.errorGeneric';
+
+      analytics.track(Events.PAYOUT_FAILED, { currency, error_code: code });
+
+      const errorMessage = t(errorKey);
+      setResultError(errorMessage);
       setResultStatus('error');
+
+      const notifPermission = mmkvStorage.getItem('notification_permission');
+      if (notifPayoutFailure && notifPermission === 'granted') {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: t('account.notifications.payoutFailure'),
+            body: errorMessage,
+            data: { screen: '/(tabs)/payouts' },
+          },
+          trigger: null,
+        });
+      }
     } finally {
-      setSubmitting(false);
       setStep('result');
     }
-  }, [getValues, t]);
+  }, [
+    getValues,
+    t,
+    biometricEnabled,
+    biometricThresholdGBP,
+    notifPayoutSuccess,
+    notifPayoutFailure,
+    submitPayout,
+  ]);
 
   const onDone = useCallback(() => {
     reset();

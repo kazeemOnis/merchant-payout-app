@@ -8,6 +8,7 @@ import { PayoutResultStep } from '@/components/payouts/payout-result-step';
 import { ScreenshotToast } from '@/components/ui/screenshot-toast';
 import { useMerchant } from '@/hooks/use-merchant';
 import { usePayout } from '@/hooks/use-payout';
+import { analytics, Events } from '@/services/analytics';
 
 export default function PayoutsScreen() {
   const { data: merchantData, loading: merchantLoading } = useMerchant();
@@ -30,7 +31,13 @@ export default function PayoutsScreen() {
   const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
-    return addScreenshotListener(() => setToastVisible(true));
+    analytics.screen(Events.SCREEN_VIEWED, { screen: 'payouts' });
+  }, []);
+  useEffect(() => {
+    return addScreenshotListener(() => {
+      setToastVisible(true);
+      analytics.track(Events.SCREENSHOT_DETECTED);
+    });
   }, []);
 
   const dismissToast = useCallback(() => setToastVisible(false), []);

@@ -77,7 +77,7 @@ export function Toast({
     <Animated.View
       style={[
         styles.wrapper,
-        { top: insets.top + 12, backgroundColor: palette.surface },
+        { top: insets.top + 6, backgroundColor: palette.surface },
         animStyle,
       ]}
       pointerEvents={visible ? 'auto' : 'none'}
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   inner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 11,
     paddingHorizontal: 14,
     gap: 10,
   },
@@ -135,6 +135,6 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
-    lineHeight: 20,
+    lineHeight: 18,
   },
 });

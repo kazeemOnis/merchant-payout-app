@@ -1,5 +1,28 @@
 {
   "onboarding": {
+    "notNow": "Not now",
+    "notifications": {
+      "titlePre": "Stay",
+      "titleHighlight": "informed.",
+      "titlePost": "",
+      "subtitle": "Get real-time alerts for payouts, account activity, and important updates.",
+      "bullet1": "Instant payout confirmation alerts",
+      "bullet2": "Unusual account activity warnings",
+      "bullet3": "Important policy and compliance updates",
+      "note": "You can manage notification preferences at any time in your device settings.",
+      "allow": "Allow Notifications"
+    },
+    "att": {
+      "titlePre": "Your",
+      "titleHighlight": "privacy",
+      "titlePost": " matters.",
+      "subtitle": "We use analytics to improve your experience. Your financial data is never shared with third parties.",
+      "bullet1": "Aggregate usage analytics only",
+      "bullet2": "No personal financial data shared",
+      "bullet3": "Helps us build a better product for you",
+      "note": "Tracking is used only for app improvement. You can change this in your device Settings > Privacy.",
+      "allow": "Allow Tracking"
+    },
     "slide1": {
       "titlePre": "Built for performance.",
       "titleHighlight": "Modular",
@@ -19,6 +42,28 @@
       "subtitle": "Fast, reliable payouts to merchants and sellers in 70+ countries."
     }
   },
+  "tabs": {
+    "home": "Home",
+    "payouts": "Payouts",
+    "analytics": "Analytics",
+    "account": "Account"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "revenue": "Revenue",
+    "transactions": "Transactions",
+    "successRate": "Success Rate",
+    "countries": "Countries",
+    "revenueTrend": "Revenue Trend",
+    "paymentMethods": "Activity mix",
+    "regionalPerformance": "Regional Performance",
+    "errorLoad": "Failed to load analytics data. Please try again.",
+    "emptyActivityMix": "No transactions in this period.",
+    "typeDeposit": "Deposits",
+    "typePayout": "Payouts",
+    "typeRefund": "Refunds",
+    "typeFee": "Fees"
+  },
   "common": {
     "next": "Next",
     "getStarted": "Get Started",
@@ -26,7 +71,85 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "retry": "Try again",
-    "close": "Close"
+    "close": "Close",
+    "save": "Save"
+  },
+  "account": {
+    "title": "Account",
+    "businessAccount": "Business Account",
+    "signOut": "Sign Out",
+    "menu": {
+      "sectionTitle": "Manage",
+      "businessProfile": "Business profile",
+      "businessProfileSubtitle": "Business details and user management",
+      "accountSettings": "Account settings",
+      "accountSettingsSubtitle": "Payment methods, security, notifications",
+      "support": "Support & legal",
+      "supportSubtitle": "Help, terms, and privacy",
+      "settings": "Settings",
+      "settingsSubtitle": "Appearance, language, and currency"
+    },
+    "appMeta": {
+      "sectionTitle": "About this app",
+      "version": "App version",
+      "lastUpdated": "Last updated",
+      "apiStatus": "API status",
+      "apiOperational": "Operational"
+    },
+    "businessProfile": {
+      "screenTitle": "Business profile",
+      "detailsTitle": "Business details",
+      "businessName": "Business name",
+      "email": "Email",
+      "accountId": "Account ID",
+      "userManagementTitle": "User management",
+      "userManagementBody": "Invite team members and manage roles from the merchant dashboard. In-app controls coming soon."
+    },
+    "accountSettings": {
+      "screenTitle": "Account settings"
+    },
+    "support": {
+      "screenTitle": "Support & legal",
+      "linksTitle": "Links",
+      "helpCenter": "Help center",
+      "terms": "Terms & conditions",
+      "privacy": "Privacy policy"
+    },
+    "settings": {
+      "screenTitle": "Settings"
+    },
+    "paymentMethods": {
+      "title": "Payment methods",
+      "brandVisa": "Visa",
+      "brandMastercard": "Mastercard",
+      "brandAmex": "American Express",
+      "maskedLast4": "•••• {last4}",
+      "hint": "Manage cards in the merchant dashboard."
+    },
+    "apiKeys": {
+      "title": "API keys",
+      "description": "API keys cannot be viewed or rotated in this app. Use the merchant dashboard for full key management."
+    },
+    "security": {
+      "title": "Security",
+      "biometricEnabled": "Biometric authentication",
+      "biometricThreshold": "Require biometrics above (£)",
+      "thresholdError": "Enter a valid positive amount",
+      "thresholdSaved": "Biometric threshold saved"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "defaultCurrency": "Default currency",
+      "theme": "Appearance",
+      "language": "Language"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "payoutSuccess": "Payout confirmed",
+      "payoutFailure": "Payout failed",
+      "disabledBanner": "Notifications are disabled. Enable them in Settings.",
+      "openSettings": "Open Settings"
+    }
   },
   "home": {
     "title": "Business Account",
@@ -72,6 +195,7 @@
     "biometricPrompt": "Authenticate to confirm payout",
     "biometricRequired": "Biometric authentication required for payouts over {threshold}.",
     "biometricNotEnrolled": "Please set up biometrics in your device settings to send large payouts.",
+    "biometricUnavailable": "Biometric authentication is not available on this device.",
     "screenshotWarning": "Screenshot detected — keep your financial details private.",
     "selectCurrency": "Select currency",
     "currencyPickerLabel": "Currency: {value}, tap to change",
@@ -94,7 +218,8 @@
     "forgotPasswordConfirmSend": "Send reset link",
     "orSignInWith": "or sign in with",
     "faceId": "Sign in with Face ID",
-    "biometricNotEnrolled": "Set up Face ID in your device settings to use this feature."
+    "biometricNotEnrolled": "Set up Face ID in your device settings to use this feature.",
+    "enableFaceId": "Enable biometric sign-in"
   },
   "errors": {
     "required": "This field is required",

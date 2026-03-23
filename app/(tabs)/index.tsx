@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,8 +8,9 @@ import { BalanceCards } from '@/components/home/balance-card';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { useMerchant } from '@/hooks/use-merchant';
-import { useThemePalette } from '@/hooks/use-theme-palette';
+import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
+import { analytics } from '@/services/analytics';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -17,6 +18,10 @@ export default function HomeScreen() {
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
   const { data, loading, error, refetch } = useMerchant();
+
+  useEffect(() => {
+    analytics.screen('home');
+  }, []);
 
   const handleViewAll = () => router.push('/modal');
 
@@ -31,7 +36,13 @@ export default function HomeScreen() {
           >
             {t('home.errorBalance')}
           </ThemedText>
-          <Button label={t('common.retry')} onPress={refetch} size='md' />
+          <Button
+            label={t('common.retry')}
+            onPress={() => {
+              refetch();
+            }}
+            size='md'
+          />
         </View>
       </SafeAreaView>
     );
@@ -67,7 +78,7 @@ export default function HomeScreen() {
   );
 }
 
-function makeStyles(p: ReturnType<typeof useThemePalette>) {
+function makeStyles(p: ThemePalette) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: p.bgDark },
     scroll: { flex: 1 },

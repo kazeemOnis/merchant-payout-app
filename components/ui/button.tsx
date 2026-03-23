@@ -9,7 +9,7 @@ import {
 import { Palette } from '@/constants/theme';
 import { fontFamily, fontSize } from '@/constants/typography';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 export type ButtonProps = PressableProps & {
@@ -34,15 +34,20 @@ export function Button({
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.base,
-        styles[variant],
-        styles[size],
-        fullWidth && styles.fullWidth,
-        pressed && !isDisabled && pressedStyles[variant],
-        isDisabled && styles.disabled,
-        style,
-      ]}
+      style={state => {
+        const { pressed } = state;
+        const resolvedStyle =
+          typeof style === 'function' ? style(state) : style;
+        return [
+          styles.base,
+          styles[variant],
+          styles[size],
+          fullWidth && styles.fullWidth,
+          pressed && !isDisabled && pressedStyles[variant],
+          isDisabled && styles.disabled,
+          resolvedStyle,
+        ];
+      }}
       disabled={isDisabled}
       accessibilityRole='button'
       accessibilityLabel={label}
@@ -52,7 +57,11 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size='small'
-          color={variant === 'primary' ? Palette.white : Palette.brandBlue}
+          color={
+            variant === 'primary' || variant === 'destructive'
+              ? Palette.white
+              : Palette.brandBlue
+          }
           testID='button-activity-indicator'
         />
       ) : (
@@ -92,6 +101,9 @@ const styles = StyleSheet.create({
   ghost: {
     backgroundColor: 'transparent',
   },
+  destructive: {
+    backgroundColor: Palette.accentRed,
+  },
 
   // Sizes — padding: .75rem 1.5rem (12 24) for md, scaled for sm/lg
   sm: {
@@ -117,8 +129,9 @@ const styles = StyleSheet.create({
 // Pressed state background colours (replaces CSS transition)
 const pressedStyles = StyleSheet.create({
   primary: { backgroundColor: Palette.ctaBluePressed },
-  secondary: { backgroundColor: Palette.accentBlueLight + '1A' }, // tinted
+  secondary: { backgroundColor: Palette.accentBlueLight + '1A' },
   ghost: { backgroundColor: Palette.surfaceElevated },
+  destructive: { backgroundColor: '#dc2626' },
 });
 
 // Label colour per variant
@@ -126,6 +139,7 @@ const labelStyles = StyleSheet.create({
   primary: { color: Palette.white },
   secondary: { color: Palette.brandBlue },
   ghost: { color: Palette.brandBlue },
+  destructive: { color: Palette.white },
 });
 
 // Font size + lineHeight per size

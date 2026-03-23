@@ -4,14 +4,14 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Palette } from '@/constants/theme';
-import {
-  type Locale,
-  type Theme,
-  useSettings,
-} from '@/contexts/settings-context';
 import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
 import { useAuthStore } from '@/store/auth-store';
+import {
+  type Locale,
+  type Theme,
+  useSettingsStore,
+} from '@/store/settings-store';
 
 const THEMES: { value: Theme; labelKey: string }[] = [
   { value: 'dark', labelKey: 'settings.dark' },
@@ -30,7 +30,7 @@ interface Props {
 
 export function SettingsModal({ visible, onClose }: Props) {
   const { t } = useTranslation();
-  const { theme, setTheme, locale, setLocale } = useSettings();
+  const { theme, setTheme, locale, setLocale } = useSettingsStore();
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
   const { clearAuth } = useAuthStore();

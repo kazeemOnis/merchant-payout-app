@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { BackHandler, Modal, Platform, Pressable, View } from 'react-native';
 
@@ -43,13 +44,7 @@ export function CurrencyPicker({ value, onChange, testID }: Props) {
         <ThemedText variant='label' color={palette.white}>
           {value}
         </ThemedText>
-        <ThemedText
-          variant='caption'
-          color={palette.textMuted}
-          style={currencyPickerStyles.chevron}
-        >
-          ▾
-        </ThemedText>
+        <Ionicons name='chevron-down' size={16} color={palette.textMuted} />
       </Pressable>
 
       <Modal

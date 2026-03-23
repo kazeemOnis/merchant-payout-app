@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { useSettings } from '@/contexts/settings-context';
+import { useSettingsStore } from '@/store/settings-store';
 import en from '@/translations/en.json';
 import fr from '@/translations/fr.json';
 
@@ -20,7 +20,7 @@ function resolveKey(obj: TranslationRecord, key: string): string {
 }
 
 export function useTranslation() {
-  const { locale } = useSettings();
+  const locale = useSettingsStore(s => s.locale);
   const translations = TRANSLATIONS[locale] as TranslationRecord;
 
   const t = useCallback(

@@ -1,0 +1,159 @@
+appId: com.checkout.app
+name: Payout Error States (insufficient funds + service unavailable)
+
+---
+
+# ─── Launch ───────────────────────────────────────────────────────────────────
+# clearState clears app data but may NOT clear iOS Keychain / SecureStore.
+# If a session token is still present, `useBootstrap` restores auth and the app
+# opens on the home tab — "Next" never appears. We branch on visible UI.
+# Home title uses typography h2 → textTransform uppercase, so the tree shows
+# "BUSINESS ACCOUNT" (not "Business Account"). Payouts tab: tap id tab-payouts.
+# ───────────────────────────────────────────────────────────────────────────────
+
+- launchApp:
+    clearState: true
+
+- waitForAnimationToEnd
+
+# Already signed in (restored session) → go straight to Payouts
+- runFlow:
+    when:
+      visible: "BUSINESS ACCOUNT"
+    commands:
+      - tapOn:
+          id: "tab-payouts"
+      - assertVisible: "Send Payout"
+
+# Fresh install / no session → onboarding + sign in
+- runFlow:
+    when:
+      visible: "Next"
+    commands:
+      - tapOn: "Next"
+      - assertVisible: "Next"
+      - tapOn: "Next"
+      - assertVisible: "Get Started"
+      - tapOn: "Get Started"
+      - assertVisible: "Allow Notifications"
+      - tapOn: "Not now"
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - assertVisible: "Allow Tracking"
+            - tapOn: "Not now"
+      - assertVisible: "Sign in"
+      - tapOn:
+          id: "email-input"
+      - inputText: "merchant@checkout.com"
+      - tapOn:
+          id: "password-input"
+      - inputText: "password123"
+      - tapOn: "Sign in"
+      - assertVisible: "BUSINESS ACCOUNT"
+      - tapOn:
+          id: "tab-payouts"
+      - assertVisible: "Send Payout"
+
+# Already on payout form (e.g. re-run flow)
+- runFlow:
+    when:
+      visible: "Send Payout"
+    commands:
+      - assertVisible: "Send Payout"
+
+- assertVisible: "Send Payout"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SUB-FLOW 1 — Insufficient Funds (MSW trigger: 88888 pence = £888.88)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Decimal keyboard can keep focus on amount — next inputText goes into the wrong
+# field. Tap a static label to blur (hideKeyboard is unreliable with RN), scroll
+# IBAN into view, then focus IBAN before typing.
+
+- tapOn:
+    id: "amount-input"
+- inputText: "888.88"
+- tapOn: "Available Balance"
+
+- scrollUntilVisible:
+    element:
+      id: "iban-input"
+    direction: DOWN
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "iban-input"
+- inputText: "GB29NWBK60161331926819"
+
+- tapOn: "Available Balance"
+
+- scrollUntilVisible:
+    element:
+      id: "payout-continue-button"
+    direction: DOWN
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "payout-continue-button"
+
+- assertVisible:
+    id: "payout-confirm-title"
+- tapOn: "Send Payout"
+
+# MSW returns 400 Insufficient Funds → error result screen
+- assertVisible: "Payout Failed"
+- assertVisible: "Insufficient funds for this payout."
+
+- tapOn: "Try Again"
+
+# Back to form — ready for next sub-flow
+- assertVisible: "Send Payout"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SUB-FLOW 2 — Service Unavailable (MSW trigger: 99999 pence = £999.99)
+# ═══════════════════════════════════════════════════════════════════════════════
+# After "Try Again", reset() clears amount + IBAN — do NOT use eraseText on empty
+# fields (Maestro backspaces can hit the wrong focused input and break validation).
+
+- tapOn:
+    id: "amount-input"
+- inputText: "999.99"
+- tapOn: "Available Balance"
+
+- scrollUntilVisible:
+    element:
+      id: "iban-input"
+    direction: DOWN
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "iban-input"
+- inputText: "GB29NWBK60161331926819"
+
+- tapOn: "Available Balance"
+
+- scrollUntilVisible:
+    element:
+      id: "payout-continue-button"
+    direction: DOWN
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "payout-continue-button"
+
+- assertVisible:
+    id: "payout-confirm-title"
+- tapOn: "Send Payout"
+
+# MSW returns 503 Service Unavailable → error result screen
+- assertVisible: "Payout Failed"
+- assertVisible: "Service temporarily unavailable. Please try again."
+
+- tapOn: "Try Again"
+- assertVisible: "Send Payout"

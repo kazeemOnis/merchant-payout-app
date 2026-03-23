@@ -4,8 +4,7 @@ import React from 'react';
 import { PaginationDots } from '@/components/onboarding/pagination-dots';
 import { Palette } from '@/constants/theme';
 
-// In tests, useSettings() returns the default context value { theme: 'dark' }.
-// useThemePalette spreads darkTokens over Palette, so textMuted is overridden.
+// PaginationDots uses Palette + hard-coded dot colours; dark theme textMuted matches darkTokens.
 const DARK_TEXT_MUTED = '#888888';
 
 describe('PaginationDots', () => {

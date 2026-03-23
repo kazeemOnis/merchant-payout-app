@@ -9,6 +9,7 @@ import {
   Platform,
   Pressable,
   StyleSheet,
+  Switch,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +23,8 @@ import { Toast } from '@/components/ui/toast';
 import { Palette } from '@/constants/theme';
 import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
+import { analytics, Events } from '@/services/analytics';
+import { useAccountStore } from '@/store/account-store';
 import { MOCK_MERCHANT, MOCK_TOKEN, useAuthStore } from '@/store/auth-store';
 
 type SignInForm = { email: string; password: string };
@@ -32,6 +35,7 @@ export default function SignInScreen() {
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
   const { setAuth } = useAuthStore();
+  const { biometricEnabled, setBiometricEnabled } = useAccountStore();
 
   const [showPassword, setShowPassword] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -77,6 +81,19 @@ export default function SignInScreen() {
   const onSubmit = async (_data: SignInForm) => {
     await new Promise(resolve => setTimeout(resolve, 800));
     setAuth(MOCK_TOKEN, MOCK_MERCHANT);
+    analytics.identify(MOCK_MERCHANT.accountId, { name: MOCK_MERCHANT.name });
+    analytics.track(Events.SIGN_IN, { method: 'email' });
+
+    if (biometricEnabled) {
+      // Trigger Face ID permission dialog now (at sign-in) so it doesn't appear on next reopen
+      try {
+        await isBiometricAuthenticated();
+      } catch {
+        // Permission denied or not available — disable the preference silently
+        setBiometricEnabled(false);
+      }
+    }
+
     router.replace('/(tabs)');
   };
 
@@ -85,6 +102,10 @@ export default function SignInScreen() {
       const ok = await isBiometricAuthenticated();
       if (ok) {
         setAuth(MOCK_TOKEN, MOCK_MERCHANT);
+        analytics.identify(MOCK_MERCHANT.accountId, {
+          name: MOCK_MERCHANT.name,
+        });
+        analytics.track(Events.SIGN_IN, { method: 'biometric' });
         router.replace('/(tabs)');
       }
     } catch (e) {
@@ -214,6 +235,27 @@ export default function SignInScreen() {
                 : t('signIn.forgotPassword')}
             </ThemedText>
           </Pressable>
+
+          {/* Biometric sign-in toggle */}
+          <View style={styles.faceIdToggle}>
+            <ThemedText
+              variant='bodySmall'
+              color={palette.textMuted}
+              style={styles.faceIdToggleLabel}
+            >
+              {t('signIn.enableFaceId')}
+            </ThemedText>
+            <Switch
+              value={biometricEnabled}
+              onValueChange={setBiometricEnabled}
+              trackColor={{
+                false: palette.surfaceElevated,
+                true: Palette.brandBlue,
+              }}
+              thumbColor={Palette.white}
+              testID='enable-face-id-toggle'
+            />
+          </View>
         </View>
 
         <View style={styles.actions}>
@@ -277,6 +319,14 @@ function makeStyles(p: ThemePalette) {
     forgotRow: {
       alignSelf: 'flex-end',
       marginTop: -8,
+    },
+    faceIdToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    faceIdToggleLabel: {
+      flex: 1,
     },
     actions: {
       gap: 16,

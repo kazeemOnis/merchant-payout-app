@@ -1,5 +1,28 @@
 {
   "onboarding": {
+    "notNow": "Pas maintenant",
+    "notifications": {
+      "titlePre": "Restez",
+      "titleHighlight": "informé.",
+      "titlePost": "",
+      "subtitle": "Recevez des alertes en temps réel pour les virements, l'activité du compte et les mises à jour importantes.",
+      "bullet1": "Confirmations instantanées de virement",
+      "bullet2": "Alertes d'activité inhabituelle",
+      "bullet3": "Mises à jour importantes de conformité",
+      "note": "Vous pouvez gérer les préférences de notification à tout moment dans les réglages de votre appareil.",
+      "allow": "Autoriser les notifications"
+    },
+    "att": {
+      "titlePre": "Votre",
+      "titleHighlight": "confidentialité",
+      "titlePost": " compte.",
+      "subtitle": "Nous utilisons des analyses pour améliorer votre expérience. Vos données financières ne sont jamais partagées.",
+      "bullet1": "Analyses d'utilisation agrégées uniquement",
+      "bullet2": "Aucune donnée financière personnelle partagée",
+      "bullet3": "Nous aide à améliorer le produit pour vous",
+      "note": "Le suivi est utilisé uniquement pour améliorer l'application. Modifiable dans Réglages > Confidentialité.",
+      "allow": "Autoriser le suivi"
+    },
     "slide1": {
       "titlePre": "Conçu pour la performance.",
       "titleHighlight": "Modulaire",
@@ -19,6 +42,28 @@
       "subtitle": "Versements rapides et fiables aux marchands dans plus de 70 pays."
     }
   },
+  "tabs": {
+    "home": "Accueil",
+    "payouts": "Virements",
+    "analytics": "Analytique",
+    "account": "Compte"
+  },
+  "analytics": {
+    "title": "Analytique",
+    "revenue": "Revenus",
+    "transactions": "Transactions",
+    "successRate": "Taux de succès",
+    "countries": "Pays",
+    "revenueTrend": "Tendance des revenus",
+    "paymentMethods": "Répartition des opérations",
+    "regionalPerformance": "Performance régionale",
+    "errorLoad": "Échec du chargement des données. Veuillez réessayer.",
+    "emptyActivityMix": "Aucune opération sur cette période.",
+    "typeDeposit": "Dépôts",
+    "typePayout": "Virements",
+    "typeRefund": "Remboursements",
+    "typeFee": "Frais"
+  },
   "common": {
     "next": "Suivant",
     "getStarted": "Commencer",
@@ -26,7 +71,85 @@
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "retry": "Réessayer",
-    "close": "Fermer"
+    "close": "Fermer",
+    "save": "Enregistrer"
+  },
+  "account": {
+    "title": "Compte",
+    "businessAccount": "Compte professionnel",
+    "signOut": "Se déconnecter",
+    "menu": {
+      "sectionTitle": "Gérer",
+      "businessProfile": "Profil entreprise",
+      "businessProfileSubtitle": "Coordonnées et gestion des utilisateurs",
+      "accountSettings": "Paramètres du compte",
+      "accountSettingsSubtitle": "Moyens de paiement, sécurité, notifications",
+      "support": "Assistance et mentions légales",
+      "supportSubtitle": "Aide, conditions et confidentialité",
+      "settings": "Réglages",
+      "settingsSubtitle": "Apparence, langue et devise"
+    },
+    "appMeta": {
+      "sectionTitle": "À propos de l’app",
+      "version": "Version de l’app",
+      "lastUpdated": "Dernière mise à jour",
+      "apiStatus": "État de l’API",
+      "apiOperational": "Opérationnel"
+    },
+    "businessProfile": {
+      "screenTitle": "Profil entreprise",
+      "detailsTitle": "Coordonnées",
+      "businessName": "Raison sociale",
+      "email": "E-mail",
+      "accountId": "Identifiant de compte",
+      "userManagementTitle": "Gestion des utilisateurs",
+      "userManagementBody": "Invitez des membres d’équipe et gérez les rôles depuis le tableau de bord marchand. Contrôles intégrés à l’app à venir."
+    },
+    "accountSettings": {
+      "screenTitle": "Paramètres du compte"
+    },
+    "support": {
+      "screenTitle": "Assistance et mentions légales",
+      "linksTitle": "Liens",
+      "helpCenter": "Centre d’aide",
+      "terms": "Conditions générales",
+      "privacy": "Politique de confidentialité"
+    },
+    "settings": {
+      "screenTitle": "Réglages"
+    },
+    "paymentMethods": {
+      "title": "Moyens de paiement",
+      "brandVisa": "Visa",
+      "brandMastercard": "Mastercard",
+      "brandAmex": "American Express",
+      "maskedLast4": "•••• {last4}",
+      "hint": "Gérez vos cartes dans le tableau de bord marchand."
+    },
+    "apiKeys": {
+      "title": "Clés API",
+      "description": "Les clés API ne peuvent pas être consultées ni renouvelées dans cette application. Utilisez le tableau de bord marchand pour la gestion complète."
+    },
+    "security": {
+      "title": "Sécurité",
+      "biometricEnabled": "Authentification biométrique",
+      "biometricThreshold": "Biométrie requise au-dessus de (£)",
+      "thresholdError": "Saisissez un montant positif valide",
+      "thresholdSaved": "Seuil biométrique enregistré"
+    },
+    "preferences": {
+      "title": "Préférences",
+      "defaultCurrency": "Devise par défaut",
+      "theme": "Apparence",
+      "language": "Langue"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "payoutSuccess": "Virement confirmé",
+      "payoutFailure": "Virement échoué",
+      "disabledBanner": "Notifications désactivées. Activez-les dans Réglages.",
+      "openSettings": "Ouvrir les réglages"
+    }
   },
   "home": {
     "title": "Compte professionnel",
@@ -72,6 +195,7 @@
     "biometricPrompt": "Authentifiez-vous pour confirmer le virement",
     "biometricRequired": "Authentification biométrique requise pour les virements supérieurs à {threshold}.",
     "biometricNotEnrolled": "Configurez la biométrie dans les paramètres pour les grands virements.",
+    "biometricUnavailable": "L'authentification biométrique n'est pas disponible sur cet appareil.",
     "screenshotWarning": "Capture d'écran détectée — gardez vos informations financières privées.",
     "selectCurrency": "Sélectionner la devise",
     "currencyPickerLabel": "Devise : {value}, appuyer pour modifier",
@@ -94,7 +218,8 @@
     "forgotPasswordConfirmSend": "Envoyer le lien",
     "orSignInWith": "ou se connecter avec",
     "faceId": "Se connecter avec Face ID",
-    "biometricNotEnrolled": "Configurez Face ID dans les réglages pour utiliser cette fonctionnalité."
+    "biometricNotEnrolled": "Configurez Face ID dans les réglages pour utiliser cette fonctionnalité.",
+    "enableFaceId": "Activer la connexion biométrique"
   },
   "errors": {
     "required": "Ce champ est requis",

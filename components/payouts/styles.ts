@@ -119,7 +119,6 @@ function makeCurrencyPickerStyles(p: ThemePalette) {
       paddingVertical: 8,
       paddingHorizontal: 14,
     },
-    chevron: { marginTop: 2 },
     backdrop: {
       flex: 1,
       backgroundColor: 'rgba(0,0,0,0.6)',

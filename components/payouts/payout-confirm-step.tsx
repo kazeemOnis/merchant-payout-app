@@ -10,12 +10,10 @@ import { Palette } from '@/constants/theme';
 import type { PayoutForm } from '@/hooks/use-payout';
 import { useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAccountStore } from '@/store/account-store';
 import type { Currency } from '@/types/api';
 import { amountToPence, formatAmount } from '@/utils/currency';
 import { formatIbanDisplay } from '@/utils/iban';
-
-// Must match BIOMETRIC_THRESHOLD_PENCE in use-payout.ts
-const BIOMETRIC_THRESHOLD_PENCE = 100_000;
 
 interface Props {
   values: PayoutForm;
@@ -33,8 +31,10 @@ export function PayoutConfirmStep({
   const { t } = useTranslation();
   const palette = useThemePalette();
   const { sharedStyles, confirmStepStyles } = usePayoutStyles();
+  const { biometricThresholdGBP } = useAccountStore();
+  const thresholdPence = biometricThresholdGBP * 100;
   const pence = amountToPence(values.amount);
-  const requiresBiometric = pence > BIOMETRIC_THRESHOLD_PENCE;
+  const requiresBiometric = pence > thresholdPence;
 
   return (
     <SafeAreaView style={sharedStyles.container} edges={['top']}>
@@ -57,6 +57,7 @@ export function PayoutConfirmStep({
           variant='h2'
           color={palette.white}
           style={sharedStyles.title}
+          testID='payout-confirm-title'
         >
           {t('payouts.confirmTitle')}
         </ThemedText>
@@ -97,7 +98,7 @@ export function PayoutConfirmStep({
             <ThemedText variant='caption' color={palette.textMuted}>
               {t('payouts.biometricRequired', {
                 threshold: formatAmount(
-                  BIOMETRIC_THRESHOLD_PENCE,
+                  thresholdPence,
                   values.currency as Currency,
                 ),
               })}

@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -9,27 +9,17 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { Skeleton } from '@/components/ui/skeleton';
-import { API_BASE_URL } from '@/constants';
 import { Palette } from '@/constants/theme';
+import { useScrollToTop } from '@/hooks/use-scroll-to-top';
 import { type ThemePalette, useThemePalette } from '@/hooks/use-theme-palette';
 import { useTranslation } from '@/hooks/use-translation';
-import type {
-  ActivityItem,
-  ActivityType,
-  Currency,
-  PaginatedActivityResponse,
-} from '@/types/api';
+import { getActivity } from '@/services/api';
+import type { ActivityItem, ActivityType, Currency } from '@/types/api';
 import { formatAmountSigned } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 
@@ -130,97 +120,51 @@ function RowSkeleton() {
 }
 
 const PAGE_SIZE = 15;
-const SCROLL_TOP_THRESHOLD = 300;
 
 export default function ActivityModal() {
   const router = useRouter();
   const { t } = useTranslation();
   const palette = useThemePalette();
   const styles = useMemo(() => makeStyles(palette), [palette]);
-  const insets = useSafeAreaInsets();
 
-  const [items, setItems] = useState<ActivityItem[]>([]);
-  const [currency, setCurrency] = useState<Currency>('GBP');
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  const isFetchingRef = useRef(false);
   const hasScrolledRef = useRef(false);
-  const listRef = useRef<FlatList>(null);
+  const {
+    listRef,
+    scrollToTop,
+    showScrollTop,
+    mergeOnScroll,
+    scrollEventThrottle,
+  } = useScrollToTop<ActivityItem>();
 
-  const scrollTopAnimStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(showScrollTop ? 1 : 0, { duration: 200 }),
-  }));
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    isRefetching,
+    refetch,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['activity-modal'],
+    queryFn: ({ pageParam }) =>
+      getActivity({ limit: PAGE_SIZE, cursor: pageParam }),
+    initialPageParam: null as string | null,
+    getNextPageParam: page => (page.has_more ? page.next_cursor : null),
+  });
 
-  const fetchPage = useCallback(
-    async (nextCursor: string | null, replace: boolean): Promise<void> => {
-      try {
-        const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
-        if (nextCursor) params.set('cursor', nextCursor);
+  const items = data?.pages.flatMap(p => p.items) ?? [];
+  const currency: Currency = items[0]?.currency ?? 'GBP';
 
-        const res = await fetch(
-          `${API_BASE_URL}/api/merchant/activity?${params}`,
-        );
-        if (!res.ok) throw new Error(`Status ${res.status}`);
+  const loadMore = () => {
+    if (!hasNextPage || isFetchingNextPage || !hasScrolledRef.current) return;
+    fetchNextPage();
+  };
 
-        const json: PaginatedActivityResponse = await res.json();
-
-        if (json.items[0]) setCurrency(json.items[0].currency);
-        setItems(prev => (replace ? json.items : [...prev, ...json.items]));
-        setCursor(json.next_cursor);
-        setHasMore(json.has_more);
-        setError(null);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t('activity.errorLoad'));
-      }
-    },
-    [t],
-  );
-
-  useEffect(() => {
-    isFetchingRef.current = true;
-    fetchPage(null, true).finally(() => {
-      isFetchingRef.current = false;
-      setInitialLoading(false);
-    });
-  }, [fetchPage]);
-
-  const loadMore = useCallback(() => {
-    if (!hasMore || !cursor || isFetchingRef.current || !hasScrolledRef.current)
-      return;
-    isFetchingRef.current = true;
-    setLoadingMore(true);
-    fetchPage(cursor, false).finally(() => {
-      isFetchingRef.current = false;
-      setLoadingMore(false);
-    });
-  }, [hasMore, cursor, fetchPage]);
-
-  const onRefresh = useCallback(() => {
-    if (isFetchingRef.current) return;
-    isFetchingRef.current = true;
+  const onRefresh = () => {
     hasScrolledRef.current = false;
-    setRefreshing(true);
-    fetchPage(null, true).finally(() => {
-      isFetchingRef.current = false;
-      setRefreshing(false);
-    });
-  }, [fetchPage]);
-
-  const retry = useCallback(() => {
-    setError(null);
-    setInitialLoading(true);
-    fetchPage(null, true).finally(() => setInitialLoading(false));
-  }, [fetchPage]);
-
-  const scrollToTop = useCallback(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, []);
+    refetch();
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -239,7 +183,7 @@ export default function ActivityModal() {
         </Pressable>
       </View>
 
-      {initialLoading && (
+      {isLoading && (
         <View style={styles.skeletonList}>
           {Array.from({ length: 12 }).map((_, i) => (
             <RowSkeleton key={i} />
@@ -247,7 +191,7 @@ export default function ActivityModal() {
         </View>
       )}
 
-      {!initialLoading && error && (
+      {!isLoading && error && (
         <View style={styles.errorContainer}>
           <ThemedText
             variant='body'
@@ -256,7 +200,7 @@ export default function ActivityModal() {
           >
             {t('activity.errorLoad')}
           </ThemedText>
-          <Pressable onPress={retry} hitSlop={8}>
+          <Pressable onPress={() => void refetch()} hitSlop={8}>
             <ThemedText variant='label' color={Palette.ctaBlue}>
               {t('common.retry')}
             </ThemedText>
@@ -264,7 +208,7 @@ export default function ActivityModal() {
         </View>
       )}
 
-      {!initialLoading && !error && (
+      {!isLoading && !error && (
         <FlatList
           ref={listRef}
           data={items}
@@ -277,12 +221,8 @@ export default function ActivityModal() {
           onScrollBeginDrag={() => {
             hasScrolledRef.current = true;
           }}
-          onScroll={e => {
-            setShowScrollTop(
-              e.nativeEvent.contentOffset.y > SCROLL_TOP_THRESHOLD,
-            );
-          }}
-          scrollEventThrottle={200}
+          onScroll={mergeOnScroll()}
+          scrollEventThrottle={scrollEventThrottle}
           onEndReached={loadMore}
           onEndReachedThreshold={0.2}
           initialNumToRender={PAGE_SIZE}
@@ -290,7 +230,7 @@ export default function ActivityModal() {
           windowSize={5}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={isRefetching}
               onRefresh={onRefresh}
               tintColor={Palette.brandBlue}
               colors={[Palette.brandBlue]}
@@ -306,7 +246,7 @@ export default function ActivityModal() {
             </ThemedText>
           }
           ListFooterComponent={
-            loadingMore ? (
+            isFetchingNextPage ? (
               <View style={styles.footer}>
                 <ActivityIndicator color={Palette.brandBlue} />
               </View>
@@ -315,18 +255,7 @@ export default function ActivityModal() {
         />
       )}
 
-      <Animated.View
-        style={[
-          styles.scrollTopButton,
-          { bottom: insets.bottom + 16 },
-          scrollTopAnimStyle,
-        ]}
-        pointerEvents={showScrollTop ? 'auto' : 'none'}
-      >
-        <Pressable onPress={scrollToTop} hitSlop={8} testID='scroll-to-top'>
-          <Ionicons name='chevron-up' size={20} color={palette.white} />
-        </Pressable>
-      </Animated.View>
+      <ScrollToTop visible={showScrollTop} onPress={scrollToTop} />
     </SafeAreaView>
   );
 }
@@ -366,20 +295,5 @@ function makeStyles(p: ThemePalette) {
     errorText: { textAlign: 'center' },
     empty: { textAlign: 'center', marginTop: 48 },
     footer: { paddingVertical: 24, alignItems: 'center' },
-    scrollTopButton: {
-      position: 'absolute',
-      right: 20,
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: p.surface,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 4,
-    },
   });
 }

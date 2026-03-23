@@ -67,7 +67,7 @@ npx expo run:android
 
 ```
 app/                    # Expo Router screens
-  _layout.tsx           # Root layout — fonts, MSW gate, SettingsProvider
+  _layout.tsx           # Root layout — fonts, MSW gate, QueryClientProvider
   index.tsx             # Onboarding
   sign-in.tsx           # Sign-in
   (tabs)/
@@ -77,6 +77,7 @@ app/                    # Expo Router screens
 screen-security/        # Local native module (Steps 4–6)
 components/             # Shared UI components
 constants/              # Theme palette, typography, translations
+store/                  # Zustand stores (settings, auth, analytics, …)
 hooks/                  # Custom hooks
 mocks/                  # MSW handlers and mock data generators
 types/                  # API types
@@ -108,7 +109,7 @@ The app uses a custom theme system built on Checkout.com brand tokens.
 
 - `constants/theme.ts` — exports `Palette` (raw tokens, always the same) and `Colors` (light/dark semantic variants)
 - `hooks/use-theme-palette.ts` — returns the active palette based on the current theme
-- `contexts/settings-context.tsx` — `SettingsProvider` wraps the app; persists `theme` and `locale` to MMKV
+- `store/settings-store.ts` — Zustand store; persists `theme` and `locale` via MMKV (`utils/storage.ts`)
 
 **Pattern used in every themed component:**
 
@@ -133,7 +134,7 @@ A floating settings button (gear icon, `zIndex: 100`) sits in the root layout an
 - **Theme** — `dark` / `light`
 - **Language** — English / French
 
-Both preferences are persisted to MMKV and applied instantly across the whole app via `SettingsProvider`.
+Both preferences are persisted to MMKV and applied instantly across the whole app via `useSettingsStore`.
 
 ## Running tests
 

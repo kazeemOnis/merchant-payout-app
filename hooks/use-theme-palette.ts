@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { Palette } from '@/constants/theme';
-import { useSettings } from '@/contexts/settings-context';
+import { useSettingsStore } from '@/store/settings-store';
 
 const darkTokens = {
   bgDark: '#000000',
@@ -19,10 +19,19 @@ const lightTokens = {
   textMuted: '#6c6c70',
 };
 
-export type ThemePalette = typeof Palette & typeof darkTokens;
+/** Keys overridden per light/dark theme (string values, not Palette literals). */
+type ThemeOverrideKeys = keyof typeof darkTokens;
+
+export type ThemePalette = Omit<typeof Palette, ThemeOverrideKeys> & {
+  bgDark: string;
+  surface: string;
+  surfaceElevated: string;
+  white: string;
+  textMuted: string;
+};
 
 export function useThemePalette(): ThemePalette {
-  const { theme } = useSettings();
+  const theme = useSettingsStore(s => s.theme);
   return useMemo(
     () => ({ ...Palette, ...(theme === 'dark' ? darkTokens : lightTokens) }),
     [theme],

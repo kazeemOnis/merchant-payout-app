@@ -1,41 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { API_BASE_URL } from '@/constants';
-import type { MerchantDataResponse } from '@/types/api';
+import { getMerchant } from '@/services/api';
 
-type State =
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'success'; data: MerchantDataResponse };
+export const MERCHANT_QUERY_KEY = ['merchant'] as const;
 
 export function useMerchant() {
-  const [state, setState] = useState<State>({ status: 'loading' });
-
-  const fetch_ = useCallback(async () => {
-    setState({ status: 'loading' });
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/merchant`);
-      if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
-      }
-      const data: MerchantDataResponse = await res.json();
-      setState({ status: 'success', data });
-    } catch (e) {
-      setState({
-        status: 'error',
-        message: e instanceof Error ? e.message : 'Failed to load account data',
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    fetch_();
-  }, [fetch_]);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: MERCHANT_QUERY_KEY,
+    queryFn: getMerchant,
+  });
 
   return {
-    loading: state.status === 'loading',
-    error: state.status === 'error' ? state.message : null,
-    data: state.status === 'success' ? state.data : null,
-    refetch: fetch_,
+    data: data ?? null,
+    loading: isLoading,
+    error: error ? (error as Error).message : null,
+    refetch,
   };
 }

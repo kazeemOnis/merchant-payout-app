@@ -170,6 +170,7 @@ export function PayoutFormStep({
 
         <View style={sharedStyles.footer}>
           <Button
+            testID='payout-continue-button'
             label={t('payouts.continue')}
             onPress={onContinue}
             fullWidth
