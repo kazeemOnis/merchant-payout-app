@@ -2,7 +2,7 @@
  * MSW Request Handlers
  */
 import { http, HttpResponse } from 'msw';
-import { API_BASE_URL } from '../constants';
+import { API_BASE_URL, CHAT_SERVER_URL } from '../constants';
 import {
   createPayout,
   getPayoutById,
@@ -11,6 +11,7 @@ import {
   getAvailableBalance,
   getPendingBalance,
   getCurrentCurrency,
+  getMockChatMessages,
 } from './data';
 import type {
   MerchantDataResponse,
@@ -168,5 +169,17 @@ export const handlers = [
 
     logRequest('GET', request.url, 200, payout);
     return HttpResponse.json(payout);
+  }),
+
+  // ── Chat REST endpoints (port 3001) ───────────────────────────────────────
+
+  // GET /api/chat/messages?roomId=general&cursor=<id>&limit=30
+  http.get(`${CHAT_SERVER_URL}/api/chat/messages`, ({ request }) => {
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor');
+    const limit = parseInt(url.searchParams.get('limit') ?? '30', 10);
+    const response = getMockChatMessages(cursor, limit);
+    logRequest('GET', request.url, 200, response);
+    return HttpResponse.json(response);
   }),
 ];

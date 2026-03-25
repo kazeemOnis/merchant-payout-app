@@ -240,5 +240,13 @@
       "fr": "Français"
     },
     "signOut": "Se déconnecter"
+  },
+  "chat": {
+    "title": "Assistance",
+    "inputPlaceholder": "Message",
+    "connecting": "Connexion…",
+    "reconnecting": "Reconnexion…",
+    "offline": "Pas de connexion — les messages seront envoyés à la reconnexion",
+    "openChat": "Ouvrir le chat"
   }
 }
