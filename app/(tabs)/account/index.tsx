@@ -9,6 +9,7 @@ import { AppMetaCard } from '@/components/account/app-meta-card';
 import { MenuNavRow } from '@/components/account/menu-nav-row';
 import { ProfileCard } from '@/components/account/profile-card';
 import { SectionCard } from '@/components/account/section-card';
+import { ChatFab } from '@/components/chat/chat-fab';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { useThemePalette } from '@/hooks/use-theme-palette';
@@ -52,6 +53,7 @@ export default function AccountHubScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
+
         <ThemedText
           variant='h2'
           color={palette.white}
@@ -114,6 +116,7 @@ export default function AccountHubScreen() {
           testID='sign-out-button'
         />
       </ScrollView>
+      <ChatFab />
     </SafeAreaView>
   );
 }

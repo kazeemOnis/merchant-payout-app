@@ -8,6 +8,7 @@ import type {
   Currency,
   PaginatedActivityResponse,
 } from '../types/api';
+import type { ChatMessage, PaginatedMessagesResponse } from '../types/chat';
 
 // In-memory store for payout states
 const payoutStore = new Map<string, { payout: PayoutResponse; created_at: number }>();
@@ -349,6 +350,48 @@ function generateNewActivities(count: number = 2): ActivityItem[] {
 export function generateMockActivity(): ActivityItem[] {
   return getAllActivities().slice(0, 15);
 }
+
+// ─── Chat mock data ────────────────────────────────────────────────────────
+
+const MOCK_CHAT_MESSAGES: ChatMessage[] = Array.from({ length: 40 }, (_, i) => ({
+  id: `mock-msg-${String(i + 1).padStart(3, '0')}`,
+  roomId: 'general',
+  authorId: i % 3 === 0 ? 'MCH-00123' : 'SUPPORT-001',
+  authorName: i % 3 === 0 ? 'Checkout Merchant' : 'Support Agent',
+  content: [
+    'Hello! How can I help you today?',
+    'I have a question about my recent payout.',
+    'Of course! Please go ahead.',
+    'The payout from yesterday hasn\'t arrived yet.',
+    'Let me check that for you right away.',
+    'It shows as processing in our system — should clear within 24 hours.',
+    'Great, thank you for checking!',
+    'Is there anything else I can help with?',
+    'No, that\'s all. Thanks!',
+    'Happy to help. Have a great day!',
+  ][i % 10],
+  createdAt: new Date(Date.now() - (40 - i) * 5 * 60 * 1000).toISOString(),
+  status: 'read' as const,
+})).reverse(); // newest-first
+
+export function getMockChatMessages(
+  cursor: string | null,
+  limit: number,
+): PaginatedMessagesResponse {
+  let endIndex = MOCK_CHAT_MESSAGES.length;
+
+  if (cursor) {
+    const idx = MOCK_CHAT_MESSAGES.findIndex(m => m.id === cursor);
+    if (idx !== -1) endIndex = idx;
+  }
+
+  const startIndex = Math.max(0, endIndex - limit);
+  const items = MOCK_CHAT_MESSAGES.slice(startIndex, endIndex);
+  const nextCursor = startIndex > 0 ? MOCK_CHAT_MESSAGES[startIndex].id : null;
+  return { items, next_cursor: nextCursor, has_more: startIndex > 0 };
+}
+
+// ─── Paginated activity ─────────────────────────────────────────────────────
 
 /**
  * Get paginated activity items using cursor-based pagination

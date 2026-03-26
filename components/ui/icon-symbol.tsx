@@ -25,6 +25,7 @@ const MAPPING = {
   'checkmark.circle.fill': 'check-circle',
   'creditcard.fill': 'credit-card',
   'chart.bar.fill': 'bar-chart',
+  'bubble.left.and.bubble.right.fill': 'chat-bubble',
 } as IconMapping;
 
 export type IconSymbolName = keyof typeof MAPPING;

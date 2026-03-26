@@ -240,5 +240,13 @@
       "fr": "French"
     },
     "signOut": "Sign Out"
+  },
+  "chat": {
+    "title": "Support Chat",
+    "inputPlaceholder": "Message",
+    "connecting": "Connecting…",
+    "reconnecting": "Reconnecting…",
+    "offline": "No connection — messages will be queued",
+    "openChat": "Open chat"
   }
 }
